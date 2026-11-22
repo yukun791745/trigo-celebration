@@ -37,14 +37,28 @@
   var id = params.get('v');
   var video = document.getElementById('v');
   var btn = document.getElementById('play');
-  if (!id) {
+  function showMsg(text) {
     btn.style.display = 'none';
     var m = document.createElement('div');
     m.id = 'msg';
-    m.textContent = '動画が指定されていません。';
+    m.textContent = text;
     document.body.appendChild(m);
-  } else {
+  }
+  if (!id) {
+    showMsg('動画が指定されていません。');
+  } else if (/^[A-Za-z0-9_-]{20,}$/.test(id)) {
+    // 旧形式: Google Drive のファイルID（ダウンロード形式のためブラウザで再生できない場合があります）
     video.src = 'https://drive.google.com/uc?export=download&id=' + encodeURIComponent(id);
+  } else if (/^[a-z0-9][a-z0-9-]*$/.test(id)) {
+    // 通常形式: このサイトに置いた動画ファイル <id>.mp4
+    video.src = id + '.mp4';
+    video.addEventListener('error', function () {
+      showMsg('動画を読み込めませんでした。');
+    }, true);
+  } else {
+    showMsg('動画が指定されていません。');
+  }
+  if (id) {
     btn.addEventListener('click', function () {
       btn.style.display = 'none';
       var p = video.play();
